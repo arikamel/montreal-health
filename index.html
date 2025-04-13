@@ -635,7 +635,7 @@
                 viewDetails: "View Details"
             },
             fr: {
-                title: "Montreal Health Hub",
+                title: "Centre de Santé de Montréal",
                 searchPlaceholder: "Entrez votre adresse (ex: 123 Rue Sainte-Catherine)",
                 findHospitals: "Trouver des hôpitaux",
                 useMyLocation: "Utiliser ma position",
@@ -1016,6 +1016,12 @@
                 locationBtn.textContent = 'Getting location...';
                 locationBtn.disabled = true;
 
+                const options = {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                };
+
                 navigator.geolocation.getCurrentPosition(
                     function(position) {
                         const lat = position.coords.latitude;
@@ -1031,51 +1037,45 @@
                                 return response.json();
                             })
                             .then(data => {
-                                console.log('Geocoding response:', data);
-                                // Construct a proper address from the response
-                                const address = constructAddress(data);
-                                console.log('Constructed address:', address);
-                                document.getElementById('address').value = address;
-                                // Use the address to find hospitals
-                                findHospitals();
-                            })
-                            .catch(error => {
-                                console.error('Error getting address:', error);
-                                alert(translations[currentLanguage].locationError);
-                            })
-                            .finally(() => {
-                                // Reset button state
+                                // Restore button state
                                 locationBtn.textContent = originalText;
                                 locationBtn.disabled = false;
+
+                                if (data && data.address) {
+                                    const address = data.address;
+                                    const city = address.city || address.town || address.village || '';
+                                    const postalCode = address.postcode || '';
+                                    
+                                    // Update the address input
+                                    document.getElementById('address').value = `${city}, ${postalCode}`;
+                                    
+                                    // Trigger the search
+                                    document.getElementById('searchBtn').click();
+                                } else {
+                                    throw new Error('Could not get address from coordinates');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                locationBtn.textContent = 'Error getting location';
+                                setTimeout(() => {
+                                    locationBtn.textContent = originalText;
+                                    locationBtn.disabled = false;
+                                }, 3000);
                             });
                     },
                     function(error) {
                         console.error('Geolocation error:', error);
-                        let errorMessage = translations[currentLanguage].locationError;
-                        switch(error.code) {
-                            case error.PERMISSION_DENIED:
-                                errorMessage = translations[currentLanguage].locationDenied;
-                                break;
-                            case error.POSITION_UNAVAILABLE:
-                                errorMessage = translations[currentLanguage].locationUnavailable;
-                                break;
-                            case error.TIMEOUT:
-                                errorMessage = translations[currentLanguage].locationTimeout;
-                                break;
-                        }
-                        alert(errorMessage);
-                        // Reset button state
-                        locationBtn.textContent = originalText;
-                        locationBtn.disabled = false;
+                        locationBtn.textContent = 'Error: ' + error.message;
+                        setTimeout(() => {
+                            locationBtn.textContent = originalText;
+                            locationBtn.disabled = false;
+                        }, 3000);
                     },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 0
-                    }
+                    options
                 );
             } else {
-                alert(translations[currentLanguage].locationNotSupported);
+                alert('Geolocation is not supported by your browser');
             }
         });
 

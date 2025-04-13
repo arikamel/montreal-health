@@ -58,4 +58,10 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Production Deployment
+The application is available at [https://www.montrealhealthhub.ca](https://www.montrealhealthhub.ca)
+
+## Local Development
+The application will be available at `http://localhost:3000` 
