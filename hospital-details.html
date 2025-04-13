@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Details - Montreal Health Hub</title>
+    <style>
+        :root {
+            --primary-color: #1976d2;
+            --primary-light: #42a5f5;
+            --primary-dark: #1565c0;
+            --secondary-color: #4caf50;
+            --secondary-light: #81c784;
+            --secondary-dark: #388e3c;
+            --accent-teal: #00acc1;
+            --accent-teal-light: #26c6da;
+            --gradient-blue: linear-gradient(135deg, var(--primary-color), var(--accent-teal));
+            --text-primary: #2c3e50;
+            --text-secondary: #546e7a;
+            --background-light: #f8f9fa;
+            --background-white: #ffffff;
+            --border-color: #e0e0e0;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+            --border-radius: 12px;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-light);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: var(--gradient-blue);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom-left-radius: var(--border-radius);
+            border-bottom-right-radius: var(--border-radius);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .header-icon {
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: var(--border-radius);
+            padding: 6px;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            backdrop-filter: blur(5px);
+        }
+
+        .header-icon:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            background-color: white;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: white;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-menu a:hover::after {
+            transform: scaleX(1);
+        }
+
+        .language-switch {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .language-switch button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            font-weight: 500;
+            backdrop-filter: blur(5px);
+        }
+
+        .language-switch button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .language-switch button.active {
+            background-color: white;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            background-color: var(--background-white);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            font-weight: 600;
+            background: var(--gradient-blue);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .hospital-info {
+            margin-bottom: 2rem;
+        }
+
+        .info-section {
+            background: linear-gradient(to right bottom, var(--background-light), var(--background-white));
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+        }
+
+        .info-section:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .info-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-section h2::before {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 24px;
+            background: var(--gradient-blue);
+            border-radius: 2px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .info-item {
+            background-color: var(--background-white);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border: 1px solid var(--border-color);
+        }
+
+        .info-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-light);
+        }
+
+        .info-item h3 {
+            color: var(--primary-color);
+            margin-bottom: 0.75rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-item p {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .services-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .service-item {
+            background-color: var(--background-white);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .service-item:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--accent-teal);
+        }
+
+        .service-item h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .service-item p {
+            color: var(--text-secondary);
+            margin: 0 0 1rem 0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            flex-grow: 1;
+        }
+
+        .service-cost {
+            color: var(--accent-teal);
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .map-container {
+            height: 400px;
+            margin: 2rem 0;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .action-button {
+            flex: 1;
+            min-width: 200px;
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            font-weight: 500;
+            text-align: center;
+            text-decoration: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .action-button.primary {
+            background: var(--gradient-blue);
+            color: white;
+            border: none;
+        }
+
+        .action-button.secondary {
+            background-color: var(--background-white);
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .action-button.primary:hover {
+            background: linear-gradient(135deg, var(--primary-dark), var(--accent-teal-light));
+        }
+
+        .action-button.secondary:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .site-footer {
+            background-color: var(--background-white);
+            padding: 3rem 0;
+            margin-top: 3rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section {
+            padding: 1rem;
+        }
+
+        .footer-section h4 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .footer-section p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-section a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-section a:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+                border-radius: 0;
+            }
+
+            .header-icon {
+                width: 38px;
+                height: 38px;
+                min-width: 38px;
+                padding: 4px;
+            }
+
+            .nav-menu {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .info-section {
+                padding: 1.5rem;
+            }
+
+            .info-section h2 {
+                font-size: 1.5rem;
+            }
+
+            .services-list {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="language-toggle" id="languageToggle">FR</button>
+        <h1 id="hospitalName" data-translate="hospitalDetails"></h1>
+        
+        <div class="hospital-info">
+            <div class="info-section">
+                <h2 data-translate="address"></h2>
+                <p id="hospitalAddress"></p>
+            </div>
+            
+            <div class="info-section">
+                <h2 data-translate="phone"></h2>
+                <p id="hospitalPhone"></p>
+            </div>
+            
+            <div class="info-section">
+                <h2 data-translate="nonInsuredServices"></h2>
+                <div class="services-grid" id="nonInsuredServices">
+                    <!-- Services will be populated here -->
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <h2 data-translate="additionalInfo"></h2>
+                <div class="additional-info-grid">
+                    <div class="info-item">
+                        <span data-translate="website"></span>
+                        <a id="hospitalWebsite" target="_blank"></a>
+                    </div>
+                    <div class="info-item">
+                        <span data-translate="specialties"></span>
+                        <span id="hospitalSpecialties"></span>
+                    </div>
+                    <div class="info-item">
+                        <span data-translate="hours"></span>
+                        <span id="hospitalHours"></span>
+                    </div>
+                    <div class="info-item">
+                        <span data-translate="parking"></span>
+                        <span id="hospitalParking"></span>
+                    </div>
+                    <div class="info-item">
+                        <span data-translate="publicTransport"></span>
+                        <span id="hospitalTransport"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="button-container">
+            <a href="/" class="button" data-translate="backToMap"></a>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Montreal Health Hub</h3>
+                <p>Your trusted source for real-time hospital information in Montreal.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="faq.html">FAQ</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <p>Email: info@montrealhealthhub.com</p>
+                <p>Phone: (514) 123-4567</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Montreal Health Hub. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        let currentLanguage = 'en'; // Default language
+
+        // Translations
+        const translations = {
+            en: {
+                hospitalDetails: "Hospital Details",
+                address: "Address",
+                phone: "Phone",
+                nonInsuredServices: "Non-Insured Services",
+                service: "Service",
+                cost: "Cost",
+                description: "Description",
+                source: "Source",
+                additionalInfo: "Additional Information",
+                website: "Website",
+                specialties: "Specialties",
+                hours: "Hours",
+                parking: "Parking",
+                publicTransport: "Public Transport",
+                backToMap: "Back to Map",
+                loading: "Loading hospital details...",
+                error: "Error loading hospital details. Please try again later.",
+                notFound: "Hospital not found",
+                backToHome: "Back to Home",
+                noServicesAvailable: "No non-insured services information available"
+            },
+            fr: {
+                hospitalDetails: "Détails de l'Hôpital",
+                address: "Adresse",
+                phone: "Téléphone",
+                nonInsuredServices: "Services Non Assurés",
+                service: "Service",
+                cost: "Coût",
+                description: "Description",
+                source: "Source",
+                additionalInfo: "Informations Supplémentaires",
+                website: "Site Web",
+                specialties: "Spécialités",
+                hours: "Heures",
+                parking: "Stationnement",
+                publicTransport: "Transport en Commun",
+                backToMap: "Retour à la Carte",
+                loading: "Chargement des détails de l'hôpital...",
+                error: "Erreur lors du chargement des détails de l'hôpital. Veuillez réessayer plus tard.",
+                notFound: "Hôpital non trouvé",
+                backToHome: "Retour à l'Accueil",
+                noServicesAvailable: "Aucune information sur les services non assurés disponible"
+            }
+        };
+
+        // Function to update translations
+        function updateTranslations() {
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[currentLanguage][key]) {
+                    element.textContent = translations[currentLanguage][key];
+                }
+            });
+
+            // Update language toggle button
+            const languageToggle = document.getElementById('languageToggle');
+            languageToggle.textContent = currentLanguage === 'en' ? 'FR' : 'EN';
+        }
+
+        // Toggle language
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'en' ? 'fr' : 'en';
+            updateTranslations();
+            loadHospitalDetails(); // Reload hospital details to update content
+        }
+
+        // Load hospital details
+        async function loadHospitalDetails() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const hospitalId = urlParams.get('id');
+                
+                if (!hospitalId) {
+                    throw new Error('No hospital ID provided');
+                }
+
+                const response = await fetch(`/api/hospital/${encodeURIComponent(hospitalId)}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const hospitalData = await response.json();
+
+                // Update the page content
+                document.getElementById('hospitalName').textContent = hospitalData.names?.[currentLanguage] || hospitalData.name || 'Unknown Hospital';
+                document.getElementById('hospitalAddress').textContent = hospitalData.address || 'Address not available';
+                document.getElementById('hospitalPhone').textContent = hospitalData.phone || 'Phone not available';
+
+                // Load non-insured services
+                const servicesList = document.getElementById('nonInsuredServices');
+                servicesList.innerHTML = '';
+                
+                if (hospitalData.nonInsuredServices && hospitalData.nonInsuredServices.length > 0) {
+                    hospitalData.nonInsuredServices.forEach(service => {
+                        const serviceItem = document.createElement('div');
+                        serviceItem.className = 'service-item';
+                        const serviceName = service.names?.[currentLanguage] || service.name || 'Unknown Service';
+                        const serviceDescription = service.descriptions?.[currentLanguage] || service.description || 'N/A';
+                        serviceItem.innerHTML = `
+                            <h3>${serviceName}</h3>
+                            <p><strong>${translations[currentLanguage].cost}:</strong> ${service.cost || 'N/A'}</p>
+                            <p><strong>${translations[currentLanguage].description}:</strong> ${serviceDescription}</p>
+                            ${service.source ? `<a href="${service.source}" target="_blank" class="source-link">
+                                ${translations[currentLanguage].source}: ${service.sourceName || 'Source'}
+                            </a>` : ''}
+                        `;
+                        servicesList.appendChild(serviceItem);
+                    });
+                } else {
+                    servicesList.innerHTML = `<p>${translations[currentLanguage].noServicesAvailable}</p>`;
+                }
+
+                // Load additional information
+                const additionalInfo = hospitalData.additionalInfo || {};
+                const website = additionalInfo.website || '#';
+                document.getElementById('hospitalWebsite').href = website;
+                document.getElementById('hospitalWebsite').textContent = website === '#' ? 'N/A' : website;
+                
+                const specialties = additionalInfo.specialties?.[currentLanguage] || additionalInfo.specialties || [];
+                document.getElementById('hospitalSpecialties').textContent = Array.isArray(specialties) ? specialties.join(', ') : specialties || 'N/A';
+                
+                document.getElementById('hospitalHours').textContent = additionalInfo.hours?.[currentLanguage] || additionalInfo.hours || 'N/A';
+                document.getElementById('hospitalParking').textContent = additionalInfo.parking?.[currentLanguage] || additionalInfo.parking || 'N/A';
+                document.getElementById('hospitalTransport').textContent = additionalInfo.publicTransport?.[currentLanguage] || additionalInfo.publicTransport || 'N/A';
+
+            } catch (error) {
+                console.error('Error loading hospital details:', error);
+                document.querySelector('.container').innerHTML = `
+                    <h1>${translations[currentLanguage].error}</h1>
+                    <a href="/" class="button">${translations[currentLanguage].backToHome}</a>
+                `;
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add event listener for language toggle
+            document.getElementById('languageToggle').addEventListener('click', toggleLanguage);
+            
+            updateTranslations();
+            loadHospitalDetails();
+        });
+    </script>
+</body>
+</html> 

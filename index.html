@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Montreal Health Hub</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #1976d2;
+            --primary-light: #42a5f5;
+            --primary-dark: #1565c0;
+            --secondary-color: #4caf50;
+            --secondary-light: #81c784;
+            --secondary-dark: #388e3c;
+            --accent-teal: #00acc1;
+            --accent-teal-light: #26c6da;
+            --gradient-blue: linear-gradient(135deg, var(--primary-color), var(--accent-teal));
+            --text-primary: #2c3e50;
+            --text-secondary: #546e7a;
+            --background-light: #f8f9fa;
+            --background-white: #ffffff;
+            --border-color: #e0e0e0;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+            --border-radius: 12px;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-light);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: var(--gradient-blue);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom-left-radius: var(--border-radius);
+            border-bottom-right-radius: var(--border-radius);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .header-icon {
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: var(--border-radius);
+            padding: 6px;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            backdrop-filter: blur(5px);
+        }
+
+        .header-icon:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            background-color: white;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: white;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-menu a:hover::after {
+            transform: scaleX(1);
+        }
+
+        .language-switch {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .language-switch button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            font-weight: 500;
+            backdrop-filter: blur(5px);
+        }
+
+        .language-switch button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .language-switch button.active {
+            background-color: white;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            background-color: var(--background-white);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            font-weight: 600;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box input {
+            flex: 1;
+            min-width: 250px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        #map {
+            height: 500px;
+            width: 100%;
+            margin: 2rem 0;
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .hospital-list {
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .hospital-card {
+            background-color: var(--background-white);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .hospital-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .hospital-card h3 {
+            margin: 0 0 1rem 0;
+            color: var(--primary-color);
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .hospital-info {
+            color: var(--text-secondary);
+            margin: 0.5rem 0;
+            font-size: 0.95rem;
+        }
+
+        .distance-info {
+            margin: 1rem 0;
+        }
+
+        .distance-badge {
+            background-color: var(--primary-light);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .occupancy-info {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background-color: var(--background-light);
+            border-radius: 8px;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0.5rem 0;
+        }
+
+        .metric-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .metric-value.low {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .metric-value.medium {
+            background-color: #fff3e0;
+            color: #ef6c00;
+        }
+
+        .metric-value.high {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+
+        .detailed-metrics {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background-color: var(--background-light);
+            border-radius: 8px;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 0.5rem 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .metric-row span:last-child {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .action-buttons button.secondary {
+            background-color: var(--background-white);
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+
+        .action-buttons button.secondary:hover {
+            background-color: var(--primary-light);
+            color: white;
+            border-color: var(--primary-light);
+        }
+
+        .details-link {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--secondary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: var(--transition);
+            text-align: center;
+            flex: 1;
+        }
+
+        .details-link:hover {
+            background-color: var(--secondary-dark);
+            transform: translateY(-1px);
+        }
+
+        .site-footer {
+            background-color: var(--background-white);
+            padding: 3rem 0;
+            margin-top: 3rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section {
+            padding: 1rem;
+        }
+
+        .footer-section h4 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .footer-section p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-section a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-section a:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        .loading {
+            text-align: center;
+            color: var(--primary-color);
+            margin: 2rem 0;
+            font-size: 1.1rem;
+        }
+
+        .error-message {
+            text-align: center;
+            color: #d32f2f;
+            margin: 2rem 0;
+            padding: 1rem;
+            background-color: #ffebee;
+            border-radius: 8px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .refresh-info {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+                border-radius: 0;
+            }
+
+            .header-icon {
+                width: 38px;
+                height: 38px;
+                min-width: 38px;
+                padding: 4px;
+            }
+
+            .nav-menu {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .search-box input,
+            .search-box button {
+                width: 100%;
+            }
+
+            .hospital-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .footer {
+            background: var(--gradient-blue);
+            color: white;
+            padding: 2rem;
+            margin-top: 3rem;
+            border-top-left-radius: var(--border-radius);
+            border-top-right-radius: var(--border-radius);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section {
+            padding: 1rem;
+        }
+
+        .footer-section h3 {
+            color: white;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .footer-section p {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <img src="images/beautiful_flat-style_logo_desi.jpeg" alt="Montreal Health Hub" class="header-icon">
+            <div class="nav-menu">
+                <a href="index.html" class="en-content">Home</a>
+                <a href="about.html" class="en-content">About</a>
+                <a href="faq.html" class="en-content">FAQ</a>
+                <a href="contact.html" class="en-content">Contact</a>
+                
+                <a href="index.html" class="fr-content" style="display: none;">Accueil</a>
+                <a href="about.html" class="fr-content" style="display: none;">À propos</a>
+                <a href="faq.html" class="fr-content" style="display: none;">FAQ</a>
+                <a href="contact.html" class="fr-content" style="display: none;">Contact</a>
+            </div>
+        </div>
+        <div class="language-switch">
+            <button id="langEN" class="active" onclick="changeLanguage('en')">EN</button>
+            <button id="langFR" onclick="changeLanguage('fr')">FR</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1 id="title">Montreal Health Hub</h1>
+        <div class="search-box">
+            <input type="text" id="address" placeholder="Enter your address (e.g., 123 Rue Sainte-Catherine)">
+            <button id="useLocation" class="location-btn" data-translate="useMyLocation">Use My Location</button>
+            <button id="search" data-translate="findHospitals">Find Hospitals</button>
+        </div>
+        <div id="map"></div>
+        <div id="refreshInfo" class="refresh-info"></div>
+        <div id="loading" class="loading" style="display: none;">Loading hospital data...</div>
+        <div id="error" class="error-message" style="display: none;"></div>
+        <div class="hospital-list" id="hospitalList">
+            <!-- Hospital cards will be added here -->
+        </div>
+    </div>
+
+    <footer class="footer en-content">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Data Source</h3>
+                <p>Hospital wait time data is provided by Données Québec under the Creative Commons Attribution 4.0 International (CC BY 4.0) license.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Legal Disclaimers</h3>
+                <p>This website is for informational purposes only. The data provided is not guaranteed to be accurate, complete, or current. Always verify information with the hospital directly before making healthcare decisions.</p>
+                <p>This website is not affiliated with, endorsed by, or sponsored by any healthcare institution or government agency.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Terms of Use</h3>
+                <p>By using this website, you agree to our terms of service. We are not responsible for any decisions made based on the information provided on this site.</p>
+            </div>
+            <div class="footer-section">
+                <p>© 2024 Montreal Health Hub. All rights reserved.</p>
+                <p>Developed and maintained by Arian Kamel</p>
+            </div>
+        </div>
+    </footer>
+
+    <footer class="footer fr-content" style="display: none;">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Source des données</h3>
+                <p>Les données sur les temps d'attente dans les hôpitaux sont fournies par Données Québec sous la licence Creative Commons Attribution 4.0 International (CC BY 4.0).</p>
+            </div>
+            <div class="footer-section">
+                <h3>Avis juridiques</h3>
+                <p>Ce site web est fourni à titre informatif uniquement. Les données fournies ne sont pas garanties d'être exactes, complètes ou à jour. Veuillez toujours vérifier les informations directement avec l'hôpital avant de prendre des décisions en matière de soins de santé.</p>
+                <p>Ce site web n'est pas affilié à, approuvé par ou parrainé par une institution de soins de santé ou une agence gouvernementale.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Conditions d'utilisation</h3>
+                <p>En utilisant ce site web, vous acceptez nos conditions d'utilisation. Nous ne sommes pas responsables des décisions prises sur la base des informations fournies sur ce site.</p>
+            </div>
+            <div class="footer-section">
+                <p>© 2024 Montreal Health Hub. Tous droits réservés.</p>
+                <p>Développé et maintenu par Arian Kamel</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Language translations
+        const translations = {
+            en: {
+                title: "Montreal Health Hub",
+                searchPlaceholder: "Enter your address (e.g., 123 Rue Sainte-Catherine)",
+                findHospitals: "Find Hospitals",
+                useMyLocation: "Use My Location",
+                phone: "Phone",
+                address: "Address",
+                services: "Services",
+                getDirections: "Get Directions",
+                viewDetails: "View Details",
+                home: "Home",
+                about: "About",
+                faq: "FAQ",
+                contact: "Contact",
+                occupancy: "ER Occupancy",
+                totalPatients: "Total Patients",
+                waitingPatients: "Patients Waiting",
+                availableStretchers: "Available Stretchers",
+                patientsOver24h: "Patients >24h",
+                patientsOver48h: "Patients >48h",
+                waitingRate: "Waiting Rate",
+                kmAway: "km away",
+                lastUpdated: "Last updated",
+                refreshInfo: "Refreshes every hour",
+                distance: "Distance",
+                lastUpdatedAt: "Last updated at",
+                refreshesEveryHour: "Refreshes every hour",
+                dataSource: "Data Source",
+                dataSourceText: "Hospital wait time data is provided by Données Québec under the Creative Commons Attribution 4.0 International (CC BY 4.0) license.",
+                legalDisclaimers: "Legal Disclaimers",
+                disclaimer1: "This website is for informational purposes only. The data provided is not guaranteed to be accurate, complete, or current. Always verify information with the hospital directly before making healthcare decisions.",
+                disclaimer2: "This website is not affiliated with, endorsed by, or sponsored by any healthcare institution or government agency.",
+                termsOfUse: "Terms of Use",
+                termsText: "By using this website, you agree to our terms of service. We are not responsible for any decisions made based on the information provided on this site.",
+                copyright: "© 2024 Montreal Health Hub. All rights reserved.",
+                developedBy: "Developed and maintained by Arian Kamel",
+                locationError: "Unable to get your location. Please make sure location services are enabled and try again.",
+                locationNotSupported: "Geolocation is not supported by your browser.",
+                locationDenied: "Location access was denied. Please enable location services in your browser settings.",
+                locationUnavailable: "Location information is unavailable. Please check your device's location settings.",
+                locationTimeout: "Location request timed out. Please try again.",
+                enterAddress: "Please enter an address first.",
+                erOccupancy: "ER Occupancy",
+                viewDetails: "View Details"
+            },
+            fr: {
+                title: "Montreal Health Hub",
+                searchPlaceholder: "Entrez votre adresse (ex: 123 Rue Sainte-Catherine)",
+                findHospitals: "Trouver des hôpitaux",
+                useMyLocation: "Utiliser ma position",
+                phone: "Téléphone",
+                address: "Adresse",
+                services: "Services",
+                getDirections: "Obtenir l'itinéraire",
+                viewDetails: "Voir les détails",
+                home: "Accueil",
+                about: "À propos",
+                faq: "FAQ",
+                contact: "Contact",
+                occupancy: "Occupation urgence",
+                totalPatients: "Patients total",
+                waitingPatients: "Patients en attente",
+                availableStretchers: "Civières disponibles",
+                patientsOver24h: "Patients >24h",
+                patientsOver48h: "Patients >48h",
+                waitingRate: "Taux d'attente",
+                kmAway: "km de distance",
+                lastUpdated: "Dernière mise à jour",
+                refreshInfo: "Actualisation toutes les heures",
+                distance: "Distance",
+                lastUpdatedAt: "Dernière mise à jour à",
+                refreshesEveryHour: "Actualisation toutes les heures",
+                dataSource: "Source des données",
+                dataSourceText: "Les temps d'attente des hôpitaux sont fournis par Données Québec sous la licence Creative Commons Attribution 4.0 International (CC BY 4.0).",
+                legalDisclaimers: "Avis juridiques",
+                disclaimer1: "Ce site Web est fourni à titre informatif uniquement. Les données fournies ne sont pas garanties d'être exactes, complètes ou à jour. Veuillez toujours vérifier les informations directement avec l'hôpital avant de prendre des décisions en matière de soins de santé.",
+                disclaimer2: "Ce site Web n'est affilié à, approuvé par ou parrainé par aucun établissement de santé ou organisme gouvernemental.",
+                termsOfUse: "Conditions d'utilisation",
+                termsText: "En utilisant ce site Web, vous acceptez nos conditions d'utilisation. Nous ne sommes pas responsables des décisions prises sur la base des informations fournies sur ce site.",
+                copyright: "© 2024 Montreal Health Hub. Tous droits réservés.",
+                developedBy: "Développé et maintenu par Arian Kamel",
+                locationError: "Impossible d'obtenir votre position. Veuillez vous assurer que les services de localisation sont activés et réessayer.",
+                locationNotSupported: "La géolocalisation n'est pas prise en charge par votre navigateur.",
+                locationDenied: "L'accès à la localisation a été refusé. Veuillez activer les services de localisation dans les paramètres de votre navigateur.",
+                locationUnavailable: "Les informations de localisation ne sont pas disponibles. Veuillez vérifier les paramètres de localisation de votre appareil.",
+                locationTimeout: "La demande de localisation a expiré. Veuillez réessayer.",
+                enterAddress: "Veuillez d'abord entrer une adresse.",
+                erOccupancy: "Occupation de l'urgence",
+                viewDetails: "Voir les détails"
+            }
+        };
+
+        let currentLanguage = 'en';
+
+        function updateRefreshInfo() {
+            if (lastRefreshTime) {
+                const refreshInfo = document.getElementById('refreshInfo');
+                const timeString = lastRefreshTime.toLocaleTimeString();
+                if (currentLanguage === 'en') {
+                    refreshInfo.textContent = `Last updated: ${timeString} (Refreshes every hour)`;
+                } else {
+                    refreshInfo.textContent = `Dernière mise à jour: ${timeString} (Actualisation toutes les heures)`;
+                }
+            }
+        }
+
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            document.querySelectorAll('.language-switch button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.language-switch button[onclick="changeLanguage('${lang}')"]`).classList.add('active');
+            
+            // Update text content
+            document.getElementById('title').textContent = translations[lang].title;
+            document.getElementById('address').placeholder = translations[lang].searchPlaceholder;
+            
+            // Update buttons separately
+            document.getElementById('search').textContent = translations[lang].findHospitals;
+            document.getElementById('useLocation').textContent = translations[lang].useMyLocation;
+            
+            // Update navigation
+            document.querySelectorAll('.nav-menu a').forEach((link, index) => {
+                const keys = ['home', 'about', 'faq', 'contact'];
+                link.textContent = translations[lang][keys[index]];
+            });
+
+            // Update refresh info
+            updateRefreshInfo();
+
+            // Update footer content
+            document.querySelectorAll('.footer').forEach(footer => {
+                footer.style.display = 'none';
+            });
+            document.querySelector(`.footer.${lang}-content`).style.display = 'block';
+
+            // Refresh hospital list if it exists
+            if (document.getElementById('address').value) {
+                findHospitals();
+            }
+        }
+
+        let hospitals = [];
+        let lastRefreshTime = null;
+        let userLocation = null;
+
+        async function geocodeAddress(address) {
+            try {
+                const response = await axios.get(`https://nominatim.openstreetmap.org/search`, {
+                    params: {
+                        q: address + ', Montreal, QC, Canada',
+                        format: 'json',
+                        limit: 1
+                    }
+                });
+
+                if (response.data && response.data.length > 0) {
+                    return {
+                        lat: parseFloat(response.data[0].lat),
+                        lon: parseFloat(response.data[0].lon)
+                    };
+                }
+                throw new Error('Address not found');
+            } catch (error) {
+                console.error('Geocoding error:', error);
+                throw new Error('Could not find the address. Please try a different address.');
+            }
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        async function fetchHospitalData() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('error').style.display = 'none';
+                
+                const response = await axios.get('/api/hospitals');
+                
+                // Check if response contains valid data
+                if (!response.data || !Array.isArray(response.data)) {
+                    throw new Error('Invalid data format received from server');
+                }
+                
+                // Update hospitals array with the new data
+                hospitals = response.data;
+                
+                // Update last refresh time
+                lastRefreshTime = new Date();
+                updateLastRefreshTime();
+                
+                // If user has already searched, update the results
+                if (userLocation) {
+                    findHospitals();
+                }
+                
+            } catch (error) {
+                console.error('Error fetching hospital data:', error);
+                document.getElementById('error').innerHTML = `
+                    <strong>Error fetching hospital data</strong><br>
+                    ${error.response?.data?.details || error.message}<br>
+                    <small>Please try again later or contact support if the problem persists.</small>
+                `;
+                document.getElementById('error').style.display = 'block';
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function updateLastRefreshTime() {
+            if (lastRefreshTime) {
+                const refreshInfo = document.getElementById('refreshInfo');
+                const timeString = lastRefreshTime.toLocaleTimeString();
+                refreshInfo.textContent = `${translations[currentLanguage].lastUpdatedAt} ${timeString} (${translations[currentLanguage].refreshesEveryHour})`;
+            }
+        }
+
+        // Initialize the map
+        const map = L.map('map').setView([45.5017, -73.5673], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        async function findHospitals() {
+            const address = document.getElementById('address').value;
+            if (!address) {
+                alert(translations[currentLanguage].enterAddress);
+                return;
+            }
+
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('error').style.display = 'none';
+
+                // Get user's location
+                userLocation = await geocodeAddress(address);
+                
+                // Calculate distances and sort hospitals
+                const hospitalsWithDistance = hospitals
+                    .filter(hospital => hospital.coordinates && hospital.coordinates.length === 2)
+                    .map(hospital => ({
+                        ...hospital,
+                        distance: calculateDistance(
+                            userLocation.lat,
+                            userLocation.lon,
+                            hospital.coordinates[0],
+                            hospital.coordinates[1]
+                        )
+                    }))
+                    .sort((a, b) => a.distance - b.distance);
+
+                // Clear previous markers
+                map.eachLayer((layer) => {
+                    if (layer instanceof L.Marker) {
+                        map.removeLayer(layer);
+                    }
+                });
+
+                // Add user location marker
+                const userMarker = L.marker([userLocation.lat, userLocation.lon], {
+                    icon: L.divIcon({
+                        className: 'user-location-marker',
+                        html: '<div style="background-color: #1976d2; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>',
+                        iconSize: [12, 12]
+                    })
+                }).addTo(map);
+
+                // Add markers for each hospital
+                hospitalsWithDistance.forEach((hospital, index) => {
+                    if (hospital.coordinates && hospital.coordinates.length === 2) {
+                        const marker = L.marker(hospital.coordinates)
+                            .addTo(map)
+                            .bindPopup(`
+                                <strong>${hospital.names && hospital.names[currentLanguage] ? hospital.names[currentLanguage] : hospital.name}</strong><br>
+                                ${hospital.address}<br>
+                                ${translations[currentLanguage].distance}: ${hospital.distance.toFixed(1)} ${translations[currentLanguage].kmAway}<br>
+                                ${translations[currentLanguage].phone}: ${hospital.phone}<br>
+                                ${translations[currentLanguage].waitingPatients}: ${hospital.patientsWaiting}
+                            `);
+
+                        // Add a line from user to hospital
+                        L.polyline(
+                            [[userLocation.lat, userLocation.lon], hospital.coordinates],
+                            { color: '#1976d2', weight: 2, opacity: 0.5 }
+                        ).addTo(map);
+                    }
+                });
+
+                // Fit map to show all markers
+                const bounds = L.latLngBounds(
+                    [userLocation.lat, userLocation.lon],
+                    ...hospitalsWithDistance
+                        .filter(h => h.coordinates && h.coordinates.length === 2)
+                        .map(h => h.coordinates)
+                );
+                map.fitBounds(bounds, { padding: [50, 50] });
+
+                // Update hospital list
+                const hospitalList = document.getElementById('hospitalList');
+                hospitalList.innerHTML = '';
+                
+                if (hospitalsWithDistance.length === 0) {
+                    document.getElementById('error').innerHTML = `
+                        <strong>No hospitals found</strong><br>
+                        <small>Please try a different address or try again later.</small>
+                    `;
+                    document.getElementById('error').style.display = 'block';
+                    return;
+                }
+
+                hospitalsWithDistance.forEach(hospital => {
+                    const card = createHospitalCard(hospital);
+                    hospitalList.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error('Error finding hospitals:', error);
+                document.getElementById('error').innerHTML = `
+                    <strong>Error finding hospitals</strong><br>
+                    ${error.message}<br>
+                    <small>Please try a different address or try again later.</small>
+                `;
+                document.getElementById('error').style.display = 'block';
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function createHospitalCard(hospital) {
+            const card = document.createElement('div');
+            card.className = 'hospital-card';
+            
+            // Calculate occupancy rate
+            const occupancyRate = hospital.functionalStretchers > 0 
+                ? Math.round((hospital.occupiedStretchers / hospital.functionalStretchers) * 100) 
+                : 0;
+            
+            // Calculate waiting rate
+            const waitingRate = hospital.totalPatients > 0 
+                ? Math.round((hospital.patientsWaiting / hospital.totalPatients) * 100) 
+                : 0;
+            
+            // Get the hospital name based on language preference
+            const hospitalName = hospital.names && hospital.names[currentLanguage] 
+                ? hospital.names[currentLanguage] 
+                : hospital.name || 'Unknown Hospital';
+            
+            card.innerHTML = `
+                <h3>${hospitalName}</h3>
+                <div class="hospital-info"><strong>${translations[currentLanguage].address}:</strong> ${hospital.address || 'N/A'}</div>
+                <div class="hospital-info"><strong>${translations[currentLanguage].phone}:</strong> ${hospital.phone || 'N/A'}</div>
+                <div class="distance-info">
+                    <span class="distance-badge">${hospital.distance.toFixed(1)} ${translations[currentLanguage].kmAway}</span>
+                </div>
+                <div class="occupancy-info">
+                    <div class="metric">
+                        <span class="metric-label">${translations[currentLanguage].occupancy}:</span>
+                        <span class="metric-value ${occupancyRate > 80 ? 'high' : occupancyRate > 50 ? 'medium' : 'low'}">
+                            ${occupancyRate}%
+                        </span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">${translations[currentLanguage].waitingRate}:</span>
+                        <span class="metric-value ${waitingRate > 50 ? 'high' : waitingRate > 25 ? 'medium' : 'low'}">
+                            ${waitingRate}%
+                        </span>
+                    </div>
+                </div>
+                <div class="detailed-metrics">
+                    <div class="metric-row">
+                        <span>${translations[currentLanguage].totalPatients}:</span>
+                        <span>${hospital.totalPatients || 'N/A'}</span>
+                    </div>
+                    <div class="metric-row">
+                        <span>${translations[currentLanguage].waitingPatients}:</span>
+                        <span>${hospital.patientsWaiting || 'N/A'}</span>
+                    </div>
+                    <div class="metric-row">
+                        <span>${translations[currentLanguage].availableStretchers}:</span>
+                        <span>${(hospital.functionalStretchers - hospital.occupiedStretchers) || 'N/A'}</span>
+                    </div>
+                    <div class="metric-row">
+                        <span>${translations[currentLanguage].patientsOver24h}:</span>
+                        <span>${hospital.patientsOver24Hours || 'N/A'}</span>
+                    </div>
+                    <div class="metric-row">
+                        <span>${translations[currentLanguage].patientsOver48h}:</span>
+                        <span>${hospital.patientsOver48Hours || 'N/A'}</span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="secondary" onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(hospital.address)}')">
+                        ${translations[currentLanguage].getDirections}
+                    </button>
+                </div>
+            `;
+            return card;
+        }
+
+        // Add event listener for the search button
+        document.getElementById('search').addEventListener('click', function() {
+            const address = document.getElementById('address').value;
+            if (address) {
+                findHospitals();
+            } else {
+                alert(translations[currentLanguage].enterAddress);
+            }
+        });
+
+        // Add event listener for the location button
+        document.getElementById('useLocation').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                // Show loading state
+                const locationBtn = document.getElementById('useLocation');
+                const originalText = locationBtn.textContent;
+                locationBtn.textContent = 'Getting location...';
+                locationBtn.disabled = true;
+
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        console.log('Got coordinates:', lat, lng);
+                        
+                        // Use reverse geocoding to get the address
+                        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok');
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                console.log('Geocoding response:', data);
+                                // Construct a proper address from the response
+                                const address = constructAddress(data);
+                                console.log('Constructed address:', address);
+                                document.getElementById('address').value = address;
+                                // Use the address to find hospitals
+                                findHospitals();
+                            })
+                            .catch(error => {
+                                console.error('Error getting address:', error);
+                                alert(translations[currentLanguage].locationError);
+                            })
+                            .finally(() => {
+                                // Reset button state
+                                locationBtn.textContent = originalText;
+                                locationBtn.disabled = false;
+                            });
+                    },
+                    function(error) {
+                        console.error('Geolocation error:', error);
+                        let errorMessage = translations[currentLanguage].locationError;
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage = translations[currentLanguage].locationDenied;
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage = translations[currentLanguage].locationUnavailable;
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage = translations[currentLanguage].locationTimeout;
+                                break;
+                        }
+                        alert(errorMessage);
+                        // Reset button state
+                        locationBtn.textContent = originalText;
+                        locationBtn.disabled = false;
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                alert(translations[currentLanguage].locationNotSupported);
+            }
+        });
+
+        // Helper function to construct a proper address from Nominatim response
+        function constructAddress(data) {
+            const address = data.address;
+            let constructedAddress = '';
+            
+            // Try to construct a proper street address
+            if (address.road) {
+                constructedAddress += address.road;
+                if (address.house_number) {
+                    constructedAddress = address.house_number + ' ' + constructedAddress;
+                }
+            }
+            
+            // Add city
+            if (address.city || address.town || address.village) {
+                if (constructedAddress) constructedAddress += ', ';
+                constructedAddress += address.city || address.town || address.village;
+            }
+            
+            // Add province/state
+            if (address.state) {
+                if (constructedAddress) constructedAddress += ', ';
+                constructedAddress += address.state;
+            }
+            
+            // Add postal code if available
+            if (address.postcode) {
+                if (constructedAddress) constructedAddress += ' ';
+                constructedAddress += address.postcode;
+            }
+            
+            // If we couldn't construct a proper address, use the display name
+            if (!constructedAddress) {
+                constructedAddress = data.display_name;
+            }
+            
+            return constructedAddress;
+        }
+
+        // Initial data fetch
+        fetchHospitalData();
+
+        // Refresh data every hour
+        setInterval(fetchHospitalData, 60 * 60 * 1000);
+    </script>
+</body>
+</html> 
