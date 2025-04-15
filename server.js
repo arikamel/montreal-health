@@ -38,6 +38,29 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+// URL rewriting middleware for clean URLs (without .html extension)
+app.use((req, res, next) => {
+    // Skip for API routes and files with extensions other than .html
+    if (req.path.startsWith('/api/') || 
+        req.path.includes('.') && !req.path.endsWith('.html')) {
+        return next();
+    }
+    
+    // For root path
+    if (req.path === '/') {
+        return next();
+    }
+
+    // If URL doesn't have an extension, try to serve the .html version
+    if (!req.path.includes('.')) {
+        const htmlPath = `${req.path}.html`;
+        // Forward to the .html version but keep the URL clean
+        req.url = htmlPath;
+    }
+    
+    next();
+});
+
 // Serve static files from the current directory
 app.use(express.static(__dirname));
 

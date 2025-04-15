@@ -1,0 +1,5 @@
+[33mcommit 5d3ccb903cfb7c0b991a1b35bd12fe87aa4de5a8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: arikamel <arian.kamel7@gmail.com>
+Date:   Sun Apr 13 19:31:30 2025 -0400
+
+    Update server.js to fix hospital data fetching and validation
